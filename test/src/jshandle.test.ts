@@ -209,6 +209,36 @@ describe('JSHandle', function () {
       expect(await properties.get('a')!.jsonValue()).toBe('1');
       expect(await properties.get('b')!.jsonValue()).toBe('2');
     });
+    it('should work for primitives', async () => {
+      const {page} = await getTestState();
+
+      for (const expression of ['42', 'true', 'null', 'undefined', '1n']) {
+        using handle = await page.evaluateHandle(expression);
+        const properties = await handle.getProperties();
+        expect(properties.size).toBe(0);
+      }
+
+      using stringHandle = await page.evaluateHandle(() => {
+        return 'ab';
+      });
+      const stringProperties = await stringHandle.getProperties();
+      expect(stringProperties.size).toBe(2);
+      using char0 = stringProperties.get('0')!;
+      using char1 = stringProperties.get('1')!;
+      expect(await char0.jsonValue()).toBe('a');
+      expect(await char1.jsonValue()).toBe('b');
+    });
+    it('should throw if the handle is disposed', async () => {
+      const {page} = await getTestState();
+
+      using aHandle = await page.evaluateHandle(() => {
+        return {foo: 'bar'};
+      });
+      await aHandle.dispose();
+      await expect(async () => {
+        return await aHandle.getProperties();
+      }).rejects.toThrow(/Attempted to use disposed/);
+    });
   });
 
   describe('JSHandle.asElement', function () {
