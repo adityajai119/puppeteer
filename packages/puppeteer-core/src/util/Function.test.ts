@@ -32,6 +32,15 @@ describe('Function', function () {
       );
       expect(test()).toBe(5);
     });
+    it('should preserve dollar patterns in replacement values', () => {
+      const test = interpolateFunction(
+        () => {
+          return PLACEHOLDER('value') as string;
+        },
+        {value: JSON.stringify('$&')},
+      );
+      expect(test()).toBe('$&');
+    });
   });
 
   describe('stringifyFunction', () => {
