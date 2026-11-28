@@ -79,7 +79,9 @@ export const interpolateFunction = <T extends (...args: never[]) => unknown>(
       // Wrapping this ensures tersers that accidentally inline PLACEHOLDER calls
       // are still valid. Without, we may get calls like ()=>{...}() which is
       // not valid.
-      () => `(${jsValue})`,
+      () => {
+        return `(${jsValue})`;
+      },
     );
   }
   return createFunction(value) as unknown as T;
